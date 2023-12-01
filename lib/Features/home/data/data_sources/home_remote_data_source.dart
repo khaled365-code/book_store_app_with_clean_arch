@@ -1,9 +1,14 @@
 
 
 
-import 'package:bookly/Features/home/data/models/book_model/BookModel.dart';
-import 'package:bookly/core/utils/api_service.dart';
+import 'dart:core';
 
+import 'package:bookly/Features/home/data/models/book_model/BookModel.dart';
+import 'package:bookly/core/constants.dart';
+import 'package:bookly/core/utils/api_service.dart';
+import 'package:hive/hive.dart';
+
+import '../../../../core/functions/save_books_data.dart';
 import '../../domain/entities/book_entity.dart';
 
 abstract class HomeRemoteDataSource
@@ -26,29 +31,39 @@ class HomeRemoteDataSourceImp extends HomeRemoteDataSource {
   {
      
 
-   var data=await apiService.get(endPoint: 'volumes?Filtering=free-ebooks&q=programming' );
-    
-    return getBooksList(data);
+   var data=await apiService.get(endPoint: 'volumes?Filtering=free-ebooks&Sorting=newest&q=software engineering' );
+
+   List<BookEntity>booksList=getBooksList(data);
+   saveBooksData(booksList,kBestsellerbooks);
+    return booksList;
     
   }
 
-  List<BookEntity> getBooksList(data)
-  {
-    List<BookEntity>booksList=[];
-    
-    for( var item in data)
-      {
-        booksList.add(BookModel.fromJson(data['items']));
-      }
-    
+  List<BookEntity> getBooksList(data) {
+    List<BookEntity> booksList = [];
+
+    for (var item in data) {
+      booksList.add(BookModel.fromJson(data['items']));
+    }
+
     return booksList;
   }
+
+
 
   @override
   Future<List<BookEntity>> fetchFeaturedBooks() async
   {
    
-     var data=await apiService.get(endPoint: 'volumes?Filtering=free-ebooks&Sorting=newest&q=software engineering');
-     return getBooksList(data);
+     var data=await apiService.get(endPoint: 'volumes?Filtering=free-ebooks&q=programming');
+     List<BookEntity>booksList=getBooksList(data);
+     saveBooksData(booksList,kFeaturedBox);
+     return booksList;
+
   }
+
+
+
+
+
 }
